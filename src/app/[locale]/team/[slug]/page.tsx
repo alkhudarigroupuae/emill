@@ -18,12 +18,14 @@ async function safe<T>(fn: () => Promise<T>, fallback: T) {
 export default async function VetProfilePage({
   params,
 }: {
-  params: { locale: Locale; slug: string };
+  params: Promise<{ locale: Locale; slug: string }>;
 }) {
+  const resolvedParams = await params;
+
   const vet = await safe(
     () =>
       prisma.veterinarian.findUnique({
-        where: { slug: params.slug },
+        where: { slug: resolvedParams.slug },
         select: {
           id: true,
           slug: true,
@@ -40,7 +42,7 @@ export default async function VetProfilePage({
   );
 
   const fallback =
-    params.slug === "dr-samira-haddad"
+    resolvedParams.slug === "dr-samira-haddad"
       ? {
           id: "demo-1",
           slug: "dr-samira-haddad",
@@ -53,7 +55,7 @@ export default async function VetProfilePage({
           country: "Jordan",
           languages: ["English", "Arabic"],
         }
-      : params.slug === "dr-luca-moretti"
+      : resolvedParams.slug === "dr-luca-moretti"
         ? {
             id: "demo-2",
             slug: "dr-luca-moretti",
@@ -137,7 +139,7 @@ export default async function VetProfilePage({
             </div>
           </div>
           <a
-            href={`/${params.locale}/team`}
+            href={`/${resolvedParams.locale}/team`}
             className="text-sm font-medium text-[color:var(--accent)] hover:underline"
           >
             Back to team
@@ -147,7 +149,7 @@ export default async function VetProfilePage({
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           {recentReports.length ? (
             recentReports.map((r) => (
-              <a key={r.id} href={`/${params.locale}/reports/${r.id}`}>
+              <a key={r.id} href={`/${resolvedParams.locale}/reports/${r.id}`}>
                 <Card className="p-6 hover:bg-[color:rgba(255,255,255,0.05)] transition">
                   <div className="text-sm text-[color:var(--muted)]">
                     {new Date(r.publishedAt).toLocaleDateString()} • {r.animal.name}
@@ -172,4 +174,3 @@ export default async function VetProfilePage({
     </div>
   );
 }
-
