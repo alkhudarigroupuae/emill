@@ -1,0 +1,249 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum Species {
+  DOG
+  CAT
+  HORSE
+}
+
+enum Sex {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
+enum AnimalStatus {
+  CRITICAL
+  RECOVERING
+  STABLE
+  RECOVERED
+}
+
+enum DonationStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum SubscriptionTier {
+  SUPPORTER
+  GUARDIAN
+  HERO
+}
+
+enum SubscriptionStatus {
+  INCOMPLETE
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
+enum AttachmentType {
+  IMAGE
+  PDF
+  OTHER
+}
+
+model User {
+  id                 String     @id @default(cuid())
+  email              String     @unique
+  passwordHash       String
+  name               String?
+  image              String?
+  role               UserRole   @default(USER)
+  twoFactorEnabled   Boolean    @default(false)
+  twoFactorSecretEnc String?
+  stripeCustomerId   String?    @unique
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  donations      Donation[]
+  subscriptions  Subscription[]
+  savedAnimals   SavedAnimal[]
+  sponsorPledges SponsorPledge[]
+}
+
+model Animal {
+  id             String       @id @default(cuid())
+  slug           String       @unique
+  name           String
+  species        Species
+  sex            Sex          @default(UNKNOWN)
+  location       String
+  country        String?
+  warAffected    Boolean      @default(false)
+  rescueDate     DateTime?
+  status         AnimalStatus @default(RECOVERING)
+  summary        String
+  beforeImageUrl String
+  afterImageUrl  String
+  coverImageUrl  String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  reports         RescueReport[]
+  recoveryEvents  RecoveryEvent[]
+  savedBy         SavedAnimal[]
+  sponsorPledges  SponsorPledge[]
+}
+
+model RecoveryEvent {
+  id          String   @id @default(cuid())
+  animalId    String
+  happenedAt  DateTime
+  title       String
+  description String
+  mediaUrl    String?
+
+  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@index([animalId, happenedAt])
+}
+
+model Veterinarian {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  specialty       String
+  experienceYears Int
+  bio             String
+  photoUrl        String?
+  country         String?
+  languages       String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  reports       RescueReport[]
+  progressLogs  ProgressLog[]
+}
+
+model RescueReport {
+  id               String   @id @default(cuid())
+  animalId         String
+  veterinarianId   String?
+  title            String
+  injuryDescription String
+  treatmentSteps   String
+  publishedAt      DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  animal       Animal        @relation(fields: [animalId], references: [id], onDelete: Cascade)
+  veterinarian Veterinarian? @relation(fields: [veterinarianId], references: [id], onDelete: SetNull)
+  attachments  Attachment[]
+  progressLogs ProgressLog[]
+
+  @@index([animalId, publishedAt])
+}
+
+model ProgressLog {
+  id             String   @id @default(cuid())
+  reportId       String
+  veterinarianId String?
+  loggedAt       DateTime @default(now())
+  note           String
+
+  report       RescueReport   @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  veterinarian Veterinarian?  @relation(fields: [veterinarianId], references: [id], onDelete: SetNull)
+
+  @@index([reportId, loggedAt])
+}
+
+model Attachment {
+  id        String        @id @default(cuid())
+  reportId  String
+  type      AttachmentType
+  url       String
+  fileName  String?
+  createdAt DateTime      @default(now())
+
+  report RescueReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@index([reportId])
+}
+
+model BlogPost {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  title        String
+  excerpt      String
+  content      String
+  coverImageUrl String?
+  tags         String[]
+  publishedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Donation {
+  id                     String         @id @default(cuid())
+  userId                 String?
+  amountCents            Int
+  currency               String         @default("usd")
+  status                 DonationStatus @default(PENDING)
+  stripeCheckoutSessionId String?       @unique
+  stripePaymentIntentId  String?        @unique
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+}
+
+model Subscription {
+  id                  String             @id @default(cuid())
+  userId              String
+  tier                SubscriptionTier
+  status              SubscriptionStatus @default(INCOMPLETE)
+  stripeSubscriptionId String?           @unique
+  stripePriceId       String
+  currentPeriodEnd    DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+}
+
+model SavedAnimal {
+  userId    String
+  animalId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@id([userId, animalId])
+}
+
+model SponsorPledge {
+  id         String   @id @default(cuid())
+  userId     String?
+  animalId   String
+  amountCents Int
+  currency   String   @default("usd")
+  stripeCheckoutSessionId String? @unique
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  animal Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@index([animalId, createdAt])
+}
