@@ -216,41 +216,38 @@ export default async function Home({
           </div>
 
           <div className="mt-8 grid gap-6 md:mt-10 md:grid-cols-12">
-            <Card className="md:col-span-7 p-7">
-              <div className="text-sm text-[color:var(--muted)]">Emergency</div>
-              <div className="mt-2 text-2xl font-semibold tracking-tight">
-                Keep field clinics stocked with antibiotics, anesthesia, and food.
-              </div>
-              <div className="mt-3 text-sm leading-6 text-[color:var(--muted)]">
-                In conflict zones, delays cost lives. Your support funds rapid triage, transport,
-                and verified treatment.
-              </div>
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <Button href={`/${params.locale}/donate?emergency=1`}>
-                  Emergency donation
-                </Button>
-                <Button href={`/${params.locale}/donate#monthly`} variant="secondary">
-                  Monthly support
-                </Button>
-              </div>
+            <Card className="md:col-span-7 overflow-hidden">
+              <div className="grid gap-6 p-7 md:grid-cols-5 md:items-center">
+                <div className="md:col-span-3">
+                  <div className="text-sm text-[color:var(--muted)]">Shelter</div>
+                  <div className="mt-2 text-2xl font-semibold tracking-tight">
+                    A safe place for abandoned dogs and cats
+                  </div>
+                  <div className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[color:var(--muted)]">
+                    We have created a shelter for homeless dogs and cats who, during this difficult and tense time, were heartlessly abandoned on the streets by many people and left behind. These animals now urgently need care, medical treatment, food, and a safe place where they can feel warmth and protection again.
+                    {"\n\n"}
+                    If you have the opportunity and the kindness to help, you can make a donation to support the care of our animals. And if you have been thinking about giving a loving home to a faithful companion, we would be happy to hear from anyone interested in adopting one of our wonderful dogs or cats.
+                    {"\n\n"}
+                    Every help matters. Every kind heart can save a life.
+                  </div>
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                    <Button href={`/${params.locale}/donate?emergency=1`}>Donate</Button>
+                    <Button href={`/${params.locale}/contact`} variant="secondary">
+                      Adopt / Contact us
+                    </Button>
+                  </div>
+                </div>
 
-              <div className="mt-8 grid gap-3 md:grid-cols-3">
-                <div className="rounded-2xl border border-[color:var(--border)] bg-[color:rgba(255,255,255,0.03)] p-4">
-                  <div className="text-sm font-medium tracking-tight">Sponsor</div>
-                  <div className="mt-1 text-xs text-[color:var(--muted)]">
-                    Fund one animal’s care plan and follow updates.
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-[color:var(--border)] bg-[color:rgba(255,255,255,0.03)] p-4">
-                  <div className="text-sm font-medium tracking-tight">Verify</div>
-                  <div className="mt-1 text-xs text-[color:var(--muted)]">
-                    See medical notes, attachments, and progress logs.
-                  </div>
-                </div>
-                <div className="rounded-2xl border border-[color:var(--border)] bg-[color:rgba(255,255,255,0.03)] p-4">
-                  <div className="text-sm font-medium tracking-tight">Share</div>
-                  <div className="mt-1 text-xs text-[color:var(--muted)]">
-                    Amplify cases to find foster partners and supplies.
+                <div className="md:col-span-2">
+                  <div className="relative aspect-[4/5] overflow-hidden rounded-3xl border border-[color:var(--border)] bg-black">
+                    <Image
+                      src="https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=1200&q=70"
+                      alt="Abandoned animal needing care"
+                      fill
+                      className="object-cover opacity-95"
+                      sizes="(max-width: 768px) 100vw, 360px"
+                    />
+                    <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(0,0,0,0.70),transparent_70%)]" />
                   </div>
                 </div>
               </div>
